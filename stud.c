@@ -209,7 +209,7 @@ static void settcpkeepalive(int fd) {
     optval = CONFIG->TCP_KEEPALIVE_TIME;
     optlen = sizeof(optval);
 #ifdef TCP_KEEPIDLE
-    if(setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen) < 0) {
+    if(setsockopt(fd, 6, TCP_KEEPIDLE, &optval, optlen) < 0) {
         ERR("Error setting TCP_KEEPIDLE on client socket: %s", strerror(errno));
     }
 #endif
