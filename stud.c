@@ -663,7 +663,17 @@ SSL_CTX *make_ctx(const char *pemfile) {
         SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
     }
 
-    if (CONFIG->PMODE == SSL_CLIENT) {
+		if (CONFIG->PEER_CRT_VRFY_DPTH) {
+			SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT | SSL_VERIFY_CLIENT_ONCE, NULL);
+			SSL_CTX_set_verify_depth(ctx, CONFIG->PEER_CRT_VRFY_DPTH);
+			// TODO: Make configurable
+			SSL_CTX_load_verify_locations(ctx, CONFIG->CERT_FILE, NULL);
+		}
+	
+  	if (CONFIG->PMODE == SSL_CLIENT) {
+				/* Disable internal cache of openssl: session reuse cause memory leak
+				 * in SSL_SESS_CACHE_CLIENT mode */
+				SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
         return ctx;
     }
 
@@ -694,13 +704,8 @@ SSL_CTX *make_ctx(const char *pemfile) {
     }
 #endif /* OPENSSL_NO_TLSEXT */
 
-	if (CONFIG->PMODE == SSL_CLIENT) {
-		/* Disable internal cache of openssl: session reuse cause memory leak
-		 * in SSL_SESS_CACHE_CLIENT mode */
-		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
-	}
 #ifdef USE_SHARED_CACHE
-    else if (CONFIG->SHARED_CACHE) {
+    if (CONFIG->SHARED_CACHE) {
         if (shared_context_init(ctx, CONFIG->SHARED_CACHE) < 0) {
             ERR("Unable to alloc memory for shared cache.\n");
             exit(1);
