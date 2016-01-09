@@ -2034,13 +2034,7 @@ int main(int argc, char **argv) {
     /* load certificates, pass to handle_connections */
     init_openssl();
 
-    if (CONFIG->CHROOT && CONFIG->CHROOT[0])
-        change_root();
-
-    if (CONFIG->UID || CONFIG->GID)
-        drop_privileges();
-
-    /* should we daemonize ?*/
+/* should we daemonize ?*/
     if (CONFIG->DAEMONIZE) {
         /* disable logging to stderr */
         CONFIG->QUIET = 1;
@@ -2049,6 +2043,12 @@ int main(int argc, char **argv) {
         /* become a daemon */
         daemonize();
     }
+
+    if (CONFIG->CHROOT && CONFIG->CHROOT[0])
+        change_root();
+
+    if (CONFIG->UID || CONFIG->GID)
+        drop_privileges();
 
     master_pid = getpid();
 
