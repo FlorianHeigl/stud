@@ -30,7 +30,7 @@
 #define CFG_CIPHERS "ciphers"
 #define CFG_SSL_ENGINE "ssl-engine"
 #define CFG_PREFER_SERVER_CIPHERS "prefer-server-ciphers"
-#define CFG_PEER_CRT_CRFY_DPTH "peer-cert-verify"
+#define CFG_PEER_CRT_VRFY_DPTH "peer-cert-verify"
 #define CFG_BACKEND "backend"
 #define CFG_FRONTEND "frontend"
 #define CFG_WORKERS "workers"
@@ -898,7 +898,7 @@ void config_print_usage_fd (char *prog, stud_config *cfg, FILE *out) {
   fprintf(out, "  -e  --ssl-engine=NAME       Sets OpenSSL engine (Default: \"%s\")\n", config_disp_str(cfg->ENGINE));
   fprintf(out, "  -O  --prefer-server-ciphers Prefer server list order\n");
   fprintf(out, "  -p  --peer-cert-verify=DEPTH\n");
-  fprintf(out, "                              Require & verify peer certificates (Default: \"%d\")\n, cfg->PEER_CRT_VRFY_DPTH);
+  fprintf(out, "                              Require & verify peer certificates (Default: \"%d\")\n", cfg->PEER_CRT_VRFY_DPTH);
   fprintf(out, "\n");
   fprintf(out, "SOCKET:\n");
   fprintf(out, "\n");

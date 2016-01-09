@@ -667,7 +667,7 @@ SSL_CTX *make_ctx(const char *pemfile) {
 			SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT | SSL_VERIFY_CLIENT_ONCE, NULL);
 			SSL_CTX_set_verify_depth(ctx, CONFIG->PEER_CRT_VRFY_DPTH);
 			// TODO: Make configurable
-			SSL_CTX_load_verify_locations(ctx, CONFIG->CERT_FILE, NULL);
+			SSL_CTX_load_verify_locations(ctx, CONFIG->CERT_FILES, NULL);
 		}
 	
   	if (CONFIG->PMODE == SSL_CLIENT) {
@@ -929,6 +929,18 @@ static int create_main_socket() {
     listen(s, CONFIG->BACKLOG);
 
     return s;
+}
+
+void do_listen() {
+	listener_socket = create_main_socket();
+
+#ifdef USE_SHARED_CACHE
+	if (CONFIG->SHCUPD_PORT) {
+		/* create socket to send(children) and receive(parent) cache updates */
+		shcupd_socket = create_shcupd_socket();
+
+	}
+#endif /* USE_SHARED_CACHE */
 }
 
 /* Initiate a clear-text nonblocking connect() to the backend IP on behalf
@@ -1727,6 +1739,10 @@ static void handle_connections() {
     /* child cannot create new children... */
     create_workers = 0;
 
+#ifdef SO_REUSEPORT
+	do_listen();
+#endif
+
 #if defined(CPU_ZERO) && defined(CPU_SET)
     cpu_set_t cpus;
 
@@ -2026,15 +2042,9 @@ int main(int argc, char **argv) {
 
     init_globals();
 
-    listener_socket = create_main_socket();
-
-#ifdef USE_SHARED_CACHE
-    if (CONFIG->SHCUPD_PORT) {
-        /* create socket to send(children) and
-               receive(parent) cache updates */
-        shcupd_socket = create_shcupd_socket();
-    }
-#endif /* USE_SHARED_CACHE */
+#ifndef SO_REUSEPORT
+	do_listen();
+#endif
 
     /* load certificates, pass to handle_connections */
     init_openssl();
