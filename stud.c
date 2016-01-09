@@ -1430,6 +1430,11 @@ static void ssl_read(struct ev_loop *loop, ev_io *w, int revents) {
     char * buf = ringbuffer_write_ptr(&ps->ring_ssl2clear);
     t = SSL_read(ps->ssl, buf, RING_DATA_LEN);
 
+	// https://github.com/bumptech/stud/pull/149
+	if (SSL_pending(ps->ssl)) {
+		ev_feed_event(loop, w, EV_READ);
+	}
+
     /* Fix CVE-2009-3555. Disable reneg if started by client. */
     if (ps->renegotiation) {
         shutdown_proxy(ps, SHUTDOWN_SSL);
