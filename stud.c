@@ -706,10 +706,12 @@ SSL_CTX *make_ctx(const char *pemfile) {
 
 #ifdef USE_SHARED_CACHE
     if (CONFIG->SHARED_CACHE) {
-        if (shared_context_init(ctx, CONFIG->SHARED_CACHE) < 0) {
+        if (shared_context_init(CONFIG->SHARED_CACHE) < 0) {
             ERR("Unable to alloc memory for shared cache.\n");
             exit(1);
         }
+	shared_context_set_cache(ctx);
+
         if (CONFIG->SHCUPD_PORT) {
             if (compute_secret(rsa, shared_secret) < 0) {
                 ERR("Unable to compute shared secret.\n");
